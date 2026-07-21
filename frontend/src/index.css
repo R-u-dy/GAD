@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------
+   GAD design tokens — "drafting table" direction.
+   Grounded in real engineering-drawing vernacular: blueprint grids,
+   title blocks, dimension-line framing, machinist safety-orange —
+   rather than a generic dark-mode + neon-accent default.
+--------------------------------------------------------------------- */
+:root {
+  --graphite-950: #14171c;
+  --graphite-900: #191d24;
+  --graphite-800: #20252d;
+  --graphite-700: #2a3038;
+  --graphite-600: #3a4149;
+
+  --paper: #e9e6df;
+  --paper-dim: #9aa2ac;
+  --paper-faint: #626a74;
+
+  --blueprint: #4a7fa8;
+  --blueprint-dim: #325a78;
+  --blueprint-glow: #7fb3d9;
+
+  --safety-orange: #ff6a2b;
+  --safety-orange-dim: #cc5320;
+  --safety-orange-glow: #ff8c5a;
+
+  --ok-green: #7fb069;
+  --warn-amber: #d9a441;
+  --err-red: #d9534f;
+
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--graphite-950);
+  color: var(--paper);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    linear-gradient(var(--graphite-800) 1px, transparent 1px),
+    linear-gradient(90deg, var(--graphite-800) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
+}
+
+::selection {
+  background: var(--safety-orange-dim);
+  color: var(--paper);
+}
+
+/* Corner-bracket frame: mimics a CAD viewport / selection gizmo.
+   Used on the 3D viewport and other "instrument panel" surfaces. */
+.bracket-frame {
+  position: relative;
+}
+.bracket-frame::before,
+.bracket-frame::after,
+.bracket-frame > .bracket-tl,
+.bracket-frame > .bracket-tr,
+.bracket-frame > .bracket-bl,
+.bracket-frame > .bracket-br {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: var(--blueprint-glow);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.bracket-frame > .bracket-tl { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+.bracket-frame > .bracket-tr { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+.bracket-frame > .bracket-bl { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+.bracket-frame > .bracket-br { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+
+/* Scanning sweep animation for the log panel while a job is running,
+   evokes a CNC head / laser scan line rather than a generic spinner. */
+@keyframes scan-sweep {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(2000%); opacity: 0; }
+}
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--blueprint-glow), transparent);
+  animation: scan-sweep 2.2s linear infinite;
+}
+
+/* Focus visibility (accessibility floor) */
+:focus-visible {
+  outline: 2px solid var(--safety-orange);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Scrollbars — thin, workshop-toolbox feel */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--graphite-900); }
+::-webkit-scrollbar-thumb { background: var(--graphite-600); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blueprint-dim); }
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
+}

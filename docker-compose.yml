@@ -1,0 +1,23 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/outputs:/app/outputs
+      - ./backend/libraries:/app/libraries
+    # Uncomment to give the container access to a USB-connected printer
+    # (Linux/macOS Docker only — USB passthrough isn't supported on
+    # Docker Desktop for Windows; run the backend natively there instead
+    # if you need printer control).
+    # devices:
+    #   - "/dev/ttyUSB0:/dev/ttyUSB0"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend

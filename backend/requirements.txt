@@ -1,0 +1,12 @@
+fastapi>=0.111
+uvicorn[standard]>=0.30
+python-dotenv>=1.0
+openai>=1.30
+SpeechRecognition>=3.10
+pydub>=0.25
+pyserial>=3.5
+Pillow>=10.0
+numpy>=1.26
+requests>=2.31
+python-multipart>=0.0.9
+sse-starlette>=2.1

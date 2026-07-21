@@ -1,0 +1,57 @@
+# Render Blueprint — deploy with: https://dashboard.render.com/blueprints
+# Push this repo to GitHub, then in Render: New > Blueprint > select the repo.
+#
+# Architecture:
+# - Backend: Docker web service (needs OpenSCAD/PrusaSlicer, so it's a
+#   real container, not a static/serverless deploy).
+# - Frontend: a free static site (just the Vite build output) — no
+#   cold starts, no compute cost, served from Render's CDN.
+#
+# One manual step after first deploy (documented in README.md):
+# once both services have real URLs, set VITE_API_BASE on the frontend
+# to the backend's URL and CORS_ORIGINS on the backend to the frontend's
+# URL, then save (Render auto-redeploys on env var changes).
+
+services:
+  - type: web
+    name: gad-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free  # OpenSCAD/PrusaSlicer are too heavy for the free tier's
+                    # 512MB RAM/0.1 CPU for anything beyond light testing.
+                    # Change to "free" if you just want to try it out first.
+    healthCheckPath: /api/health
+    envVars:
+      - key: MOCK_MODE
+        value: "true"  # safe default: anonymous visitors get mock mode
+                         # unless they add their own key in Settings
+      - key: OPENSCAD_BIN
+        value: openscad
+      - key: SLICER_BIN
+        value: prusa-slicer
+      - key: CORS_ORIGINS
+        value: "*"  # tighten to your frontend's real URL after first deploy
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "10"
+      # Add these in the Render dashboard (not here) if you want the
+      # server itself to have a key for visitors who don't bring their
+      # own — mark them "sync: false" so they're prompted for securely
+      # rather than committed to the repo:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+
+  - type: web
+    name: gad-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE
+        value: https://gad-backend.onrender.com  # placeholder — update after
+                                                    # backend deploys if your
+                                                    # service name differs
