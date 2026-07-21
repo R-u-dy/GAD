@@ -1,6 +1,6 @@
 # GAD — Deployment & Development Guide (internal / owner use)
 
-**This is not the visitor-facing README** — see `README.md` for that.
+**This is not the online-facing README** — see `README.md` for that.
 This file covers local development, Docker, and hosting setup for
 whoever owns/operates this project.
 
@@ -99,61 +99,6 @@ the self-evaluation loop. Not needed on macOS/Windows/desktop Linux.
 - https://www.prusa3d.com/prusaslicer/
 - Set `SLICER_BIN` in `backend/.env` if it's not named `prusa-slicer` on
   your system.
-
-## Option C — Deploy publicly (Render)
-
-This is the path for "a real website other people can use with their own
-API key" rather than something running on your own machine. Included:
-`render.yaml` at the repo root, a Blueprint that sets up two services:
-
-- **Backend** — a Docker web service (needs OpenSCAD/PrusaSlicer, so it
-  has to be a real container, not a static deploy). Paid Starter tier
-  ($7/mo) recommended — OpenSCAD + PrusaSlicer are heavier than the free
-  tier's 512MB RAM/0.1 CPU comfortably handles, especially at "production"
-  detail level.
-- **Frontend** — a free, unlimited static site (just the built React app,
-  served from Render's CDN). No cold starts, no cost, regardless of the
-  backend's plan.
-
-### Steps
-
-1. **Push this repo to GitHub** (Render deploys from a connected repo):
-   ```
-   git init
-   git add .
-   git commit -m "GAD"
-   ```
-   Create a new repo at https://github.com/new, then:
-   ```
-   git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPO.git
-   git push -u origin main
-   ```
-
-2. **Create the Blueprint**: go to https://dashboard.render.com/blueprints,
-   click New Blueprint Instance, select your repo. Render reads
-   `render.yaml` and proposes both services — review and click Apply.
-
-3. **One manual linking step** (can't be fully automated safely — see
-   comment in `render.yaml`): once both services have deployed and you
-   can see their real `.onrender.com` URLs in the dashboard:
-   - On **gad-frontend**: set env var `VITE_API_BASE` to the backend's
-     URL (e.g. `https://gad-backend-xxxx.onrender.com`), save (triggers
-     a rebuild).
-   - On **gad-backend**: set env var `CORS_ORIGINS` to the frontend's
-     URL (e.g. `https://gad-frontend-xxxx.onrender.com`), save.
-
-4. **Visit the frontend's URL.** Anonymous visitors get mock mode by
-   default (`MOCK_MODE=true`) unless they add their own key via the
-   "add api key" button — which is presumably the point, since you asked
-   about letting people use their own key. If you also want the server
-   to have its own key as a fallback (rate-limited to protect your
-   budget — see Production checklist below), add `OPENAI_API_KEY` /
-   `GEMINI_API_KEY` in the backend service's Environment tab in the
-   Render dashboard (kept out of `render.yaml`/git on purpose).
-
-5. **Custom domain** (optional): Render → your frontend service →
-   Settings → Custom Domains. Point your domain's DNS at Render per
-   their on-screen instructions; HTTPS is automatic.
 
 ### Alternatives
 
