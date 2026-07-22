@@ -3,6 +3,14 @@ import { KeyRound } from "lucide-react";
 export default function Header({ mockMode, openscadAvailable, onOpenSettings, hasUserKey }) {
   const today = new Date().toISOString().slice(0, 10);
 
+  // A visitor's own key always makes their requests go live, regardless
+  // of the server's own default (see core/llm_client.py) — the badge
+  // should reflect what will actually happen for *this* visitor, not
+  // just the server's baseline config, or it reads as broken/confusing
+  // right after someone adds a working key.
+  const effectiveLive = hasUserKey || !mockMode;
+  const modeLabel = hasUserKey ? "live (your key)" : mockMode ? "mock" : "live";
+
   return (
     <header className="flex items-stretch border-b border-[var(--graphite-700)] bg-[var(--graphite-900)]">
       <div className="flex items-center gap-3 px-5 py-3">
@@ -40,8 +48,8 @@ export default function Header({ mockMode, openscadAvailable, onOpenSettings, ha
         <TitleField label="Date" value={today} />
         <TitleField
           label="Mode"
-          value={mockMode ? "mock" : "live"}
-          accent={mockMode ? "var(--warn-amber)" : "var(--ok-green)"}
+          value={modeLabel}
+          accent={effectiveLive ? "var(--ok-green)" : "var(--warn-amber)"}
         />
         <TitleField
           label="OpenSCAD"
